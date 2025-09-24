@@ -1,27 +1,5 @@
-import OpenAI from "openai";
 import { createAnthropic } from '@ai-sdk/anthropic';
-
-// Configure OpenRouter LLaMA
-export function openRouter() {
-  return new OpenAI({
-    apiKey: process.env.OPENROUTER_API_KEY,
-    baseURL: process.env.OPENROUTER_API_BASE_URL,
-  });
-}
-
-// Configure Anthropic
-export function anthropic() {
-  return createAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY || '',
-  });
-}
-
-// Configure OpenAI
-export function openai() {
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || '',
-  });
-}
+import { createOpenAI } from '@ai-sdk/openai';
 
 // Model definitions
 export const MODELS = {
@@ -79,12 +57,48 @@ export const MODELS = {
     model: "deepseek-coder",
     maxTokens: 8192,
   },
-  "openrouter:llama-coder": {
-    id: "openrouter:llama-coder",
+  "openrouter:meta-llama/llama-3.1-70b-instruct": {
+    id: "openrouter:meta-llama/llama-3.1-70b-instruct",
     provider: "openrouter",
-    model: "llama-coder",
+    model: "meta-llama/llama-3.1-70b-instruct",
     maxTokens: 8192,
   },
 };
 
 export type ModelID = keyof typeof MODELS;
+
+export function getModelFromId(modelId: ModelID, env: Env) {
+  const modelDef = MODELS[modelId];
+  if (!modelDef) throw new Error(`Unknown model: ${modelId}`);
+
+  switch (modelDef.provider) {
+    case 'anthropic': {
+      const provider = createAnthropic({
+        apiKey: (env?.ANTHROPIC_API_KEY as string | undefined) || process.env.ANTHROPIC_API_KEY || '',
+      });
+      return provider(modelDef.model);
+    }
+    case 'openai': {
+      const provider = createOpenAI({
+        apiKey: (env?.OPENAI_API_KEY as string | undefined) || process.env.OPENAI_API_KEY || '',
+      });
+      return provider(modelDef.model);
+    }
+    case 'openrouter': {
+      const provider = createOpenAI({
+        apiKey: (env?.OPENROUTER_API_KEY as string | undefined) || process.env.OPENROUTER_API_KEY || '',
+        baseURL:
+          (env?.OPENROUTER_API_BASE_URL as string | undefined) ||
+          process.env.OPENROUTER_API_BASE_URL ||
+          'https://openrouter.ai/api/v1',
+        headers: {
+          'HTTP-Referer': (env?.OPENROUTER_SITE_URL as string | undefined) || process.env.OPENROUTER_SITE_URL || '',
+          'X-Title': (env?.OPENROUTER_APP_NAME as string | undefined) || process.env.OPENROUTER_APP_NAME || '',
+        },
+      });
+      return provider(modelDef.model);
+    }
+    default:
+      throw new Error(`Unsupported provider: ${modelDef.provider}`);
+  }
+}

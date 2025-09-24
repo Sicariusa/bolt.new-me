@@ -1,9 +1,7 @@
-import { createAnthropic } from '@ai-sdk/anthropic';
+import { DEFAULT_MODEL } from '~/config';
+import { getModelFromId, type ModelID } from './models';
 
-export function getAnthropicModel(apiKey: string) {
-  const anthropic = createAnthropic({
-    apiKey,
-  });
-
-  return anthropic('claude-3-5-sonnet-20240620');
+export function getModel(env: Env, modelId?: string) {
+  const id = (modelId as ModelID | undefined) || (DEFAULT_MODEL as ModelID);
+  return getModelFromId(id, env);
 }
