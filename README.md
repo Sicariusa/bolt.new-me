@@ -1,3 +1,65 @@
+# LLM Configuration (OpenRouter, Anthropic, OpenAI)
+
+This project supports multiple LLM providers via the AI SDK, including OpenRouter (recommended), Anthropic, and OpenAI. The default is configured to a free coding model on OpenRouter.
+
+## Default Model
+
+The default model is defined in `app/config.ts`:
+
+```ts
+export const DEFAULT_MODEL = "openrouter:deepseek/deepseek-coder-v2";
+```
+
+You can change this to any supported model ID from the `MODELS` map in `app/lib/.server/llm/models.ts` or add your own.
+
+## How Model Selection Works
+
+- `DEFAULT_MODEL` is read by the server at `app/lib/.server/llm/stream-text.ts`.
+- It resolves to a provider using `getModelFromId` in `app/lib/.server/llm/models.ts`.
+- OpenRouter is accessed through the OpenAI-compatible API with a custom `baseURL` and headers.
+
+## Switching Models
+
+1. Update `DEFAULT_MODEL` in `app/config.ts` to one of:
+   - `openrouter:deepseek/deepseek-coder-v2` (recommended, broad availability)
+   - `openrouter:meta-llama/llama-3.1-70b-instruct`
+   - `openrouter:qwen/qwen2.5-coder-32b-instruct` (availability may vary)
+   - `openai:gpt-4o`
+   - `anthropic:claude-3-5-sonnet-20240620`
+2. Or add a new entry to `MODELS` in `app/lib/.server/llm/models.ts` and set `DEFAULT_MODEL` accordingly.
+
+## Environment Variables
+
+For OpenRouter:
+
+- `OPENROUTER_API_KEY` (required)
+- `OPENROUTER_API_BASE_URL` (optional, default `https://openrouter.ai/api/v1`)
+- `OPENROUTER_SITE_URL` (optional, sent as `HTTP-Referer` header)
+- `OPENROUTER_APP_NAME` (optional, sent as `X-Title` header)
+
+For Anthropic:
+
+- `ANTHROPIC_API_KEY`
+
+For OpenAI:
+
+- `OPENAI_API_KEY`
+
+The runtime types for these variables are declared in `worker-configuration.d.ts`.
+
+## Notes on Free Models
+
+- Some OpenRouter models expose `:free` routes. If a `:free` variant returns an error (e.g., 400), remove `:free` or switch to another free-eligible model from your OpenRouter dashboard.
+- Recommended free coding model: `openrouter:qwen/qwen2.5-coder-32b-instruct:free`.
+
+## Files Touched by LLM Integration
+
+- `app/config.ts` – sets `DEFAULT_MODEL`.
+- `app/lib/.server/llm/models.ts` – defines `MODELS` and provider wiring.
+- `app/lib/.server/llm/model.ts` – resolves the selected model.
+- `app/lib/.server/llm/stream-text.ts` – streams responses using the selected model.
+- `worker-configuration.d.ts` – declares required env variables.
+
 [![Bolt.new: AI-Powered Full-Stack Web Development in the Browser](./public/social_preview_index.jpg)](https://bolt.new)
 
 # Bolt.new: AI-Powered Full-Stack Web Development in the Browser

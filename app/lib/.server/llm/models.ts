@@ -63,6 +63,30 @@ export const MODELS = {
     model: "meta-llama/llama-3.1-70b-instruct",
     maxTokens: 8192,
   },
+  "openrouter:meta-llama/llama-3.1-8b-instruct": {
+    id: "openrouter:meta-llama/llama-3.1-8b-instruct",
+    provider: "openrouter",
+    model: "meta-llama/llama-3.1-8b-instruct",
+    maxTokens: 8192,
+  },
+  "openrouter:qwen/qwen2.5-coder-32b-instruct:free": {
+    id: "openrouter:qwen/qwen2.5-coder-32b-instruct:free",
+    provider: "openrouter",
+    model: "qwen/qwen2.5-coder-32b-instruct:free",
+    maxTokens: 8192,
+  },
+  "openrouter:qwen/qwen2.5-7b-instruct": {
+    id: "openrouter:qwen/qwen2.5-7b-instruct",
+    provider: "openrouter",
+    model: "qwen/qwen2.5-7b-instruct",
+    maxTokens: 8192,
+  },
+  "openrouter:deepseek/deepseek-r1-0528:free": {
+    id: "openrouter:deepseek/deepseek-r1-0528:free",
+    provider: "openrouter",
+    model: "deepseek/deepseek-r1-0528:free",
+    maxTokens: 8192,
+  },
 };
 
 export type ModelID = keyof typeof MODELS;
